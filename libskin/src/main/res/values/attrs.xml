@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TextView 控件属性-->
+    <declare-styleable name="NeTextView">
+        <attr name="android:background"/>
+        <attr name="android:textColor"/>
+    </declare-styleable>
+
+    <!-- Button控件继承TextView，此处parent语法通过，但无效果，不像style.xml -->
+    <declare-styleable name="NeButton">
+        <attr name="android:background"/>
+        <attr name="android:textColor"/>
+    </declare-styleable>
+
+    <!--ImageView 控件特有属性-->
+    <declare-styleable name="NeImageView">
+        <attr name="android:src"/>
+    </declare-styleable>
+
+    <!-- SkinnableLinearLayout控件 -->
+    <declare-styleable name="NeLinearLayout">
+        <attr name="android:background"/>
+    </declare-styleable>
+
+    <!-- SkinnableRelativeLayout控件 -->
+    <declare-styleable name="NeRelativeLayout">
+        <attr name="android:background"/>
+    </declare-styleable>
+
+    <!-- 后续架构师扩展 -->
+</resources>

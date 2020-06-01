@@ -87,4 +87,5 @@ apk很重要的角色：AndroidManifest.xml
 
 ----------
 
-下一次的直播（动态换肤） 换肤续集
+大佬博客：
+[https://www.yuque.com/docs/share/a80426d9-7607-49c3-9c4d-47e86f972f7c?#](https://www.yuque.com/docs/share/a80426d9-7607-49c3-9c4d-47e86f972f7c?#)

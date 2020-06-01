@@ -1,13 +1,16 @@
 package com.sty.ne.staticskinpeeler;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-public class MainActivity extends AppCompatActivity {
+import com.sty.ne.libskin.SkinActivity;
+
+import androidx.appcompat.app.AppCompatDelegate;
+
+public class MainActivity extends SkinActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private Button btnChange;
@@ -28,10 +31,24 @@ public class MainActivity extends AppCompatActivity {
         btnChange.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                onBtnChangeClicked();
             }
         });
         Log.d(TAG, "MainActivity onCreate: 3");
+    }
+
+    private void onBtnChangeClicked() {
+        int uiMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        switch (uiMode) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                setDayNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                break;
+            case Configuration.UI_MODE_NIGHT_YES:
+                setDayNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -43,4 +60,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
     }
+
+    @Override
+    public boolean openSkin() {
+        return true;
+    }
+
+
 }

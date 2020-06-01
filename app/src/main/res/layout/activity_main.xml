@@ -34,6 +34,7 @@
         android:background="@color/commonTextColor"
         android:text="白天 / 黑夜"
         android:textColor="@color/commonTextColor1"
+        android:padding="16dp"
         android:layout_marginTop="16dp"/>
 
 </LinearLayout>
