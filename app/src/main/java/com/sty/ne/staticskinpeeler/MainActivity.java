@@ -37,6 +37,9 @@ public class MainActivity extends SkinActivity {
         Log.d(TAG, "MainActivity onCreate: 3");
     }
 
+    /**
+     * 切换白天和黑夜模式，利用了兼容库（本身就实现了黑夜和白天模式的管理）
+     */
     private void onBtnChangeClicked() {
         int uiMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         switch (uiMode) {
