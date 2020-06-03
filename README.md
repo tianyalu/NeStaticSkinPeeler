@@ -258,16 +258,16 @@
 
 **总结：**
 
-resID  --> XmlResourceParser ---> while遍历当前布局里面所有的控件
-{
-    要添加进去的View View view = createViewFromTag() {
-        1.区分是否是自定义控件
-        不是自定义控件： android.view.TextView
-        无论是系统控件还是自定义控件，最终通过反射实例化
-        return view;
-    }
-    根布局.addView(view);
-}
+resID  --> XmlResourceParser ---> while遍历当前布局里面所有的控件  
+{  
+    要添加进去的View View view = createViewFromTag() {  
+        1.区分是否是自定义控件  
+        不是自定义控件： android.view.TextView  
+        无论是系统控件还是自定义控件，最终通过反射实例化  
+        return view;  
+    }  
+    根布局.addView(view);  
+}  
 
 ### 3.2 `Factory2`的分析  
 
@@ -308,11 +308,12 @@ LayoutInflater.from(this).setFactory2(this);
 
 ![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/set_factory19.png)  
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/install_factory20.png)  
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/set_factory20.png)  
 
 可以看到368行有一个`mFactorySet`标记，这个标记的初始值为false，一旦设置过一次`factory`，这个标记会在374行设置为`true`，下次再设置时，会在369行抛出异常。所以要在`Activity`的`super.onCreate()`方法之前调用`setFactory()`方法。
 
-**这就解释了2.2.3中为什么要在`onCreate()`方法中提前设置工厂，并且为什么要复写`onCreateView()`方法，而且在该方法中可以替换原生控件为自定义控件了。 **
+
+**这就解释了2.2.3中为什么要在`onCreate()`方法中提前设置工厂，并且为什么要复写`onCreateView()`方法，而且在该方法中可以替换原生控件为自定义控件了。**
 
 本文参考：  
 [android暗黑模式学习记录](https://www.yuque.com/docs/share/a80426d9-7607-49c3-9c4d-47e86f972f7c?#)
