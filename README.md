@@ -138,6 +138,126 @@
 
 ### 3.1 `setContentView(resID)`分析  
 
+为什么通过这句代码把布局ID丢进去之后就能把`xml`中的布局加载到`Activity`上呢？
+
+点击`setContentView()`跟进源码，一路追踪`AppcompatActivity`-->`AppCompatDelegate`-->`AppCompatDelegateImpl`，在`AppCompatDelegateImple`中，我们发现`resId`传给了`LayoutInflater`中的`inflate()`方法。  
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/set_content_view1.png)  
+
+继续查看`inflate()`方法  
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/inflate2.png)  
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/inflate3.png)  
+
+我们发现`resId`最终通过`Resources`的`getLayout()`方法将`int`型的资源`id`转换成了一个`XmlResourceParser`对象，该对象是一个xml的解析工具，具体用法可参考这里：[使用XmlResourceParser动态解析XML](https://www.jianshu.com/p/36b04fcf3d38)。
+
+然后再一次调用`inflate()`方法，并将转换后的`XmlResourceParser`对象传入。我们继续查看inflate()方法：
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/inflate4.png)
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/inflate5.png)    
+
+在该方法中，如果`xml`的根布局为`<merge/>`标签的话，调用`rInflate()`方法递归创建`View`，否则的话就调用`createViewFromTag()`方法和`rInflateChildren()`方法，该方法又会调用`rInflate()`方法。我们先看一下`rInflate()`方法做了什么：
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/rinflate6.png)    
+
+可以看到该方法先是做了一些检查，然后同样调用了`createViewFromTag()`方法和`rInflateChildren()`方法，我们先进入`createViewFromTag()`方法：
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/create_view_from_tag7.png)    
+
+这里我们关注两点，首先是调用`tryCreateView()`方法创建`View`；其次如果为空的话，会调用`onCreateView()`或`createView()`方法来创建`View`。
+
+这里可以看到一个知识点是系统如何区分这个View到底是系统控件还是自定义控件呢？关键在于`-1 == name.indexOf('.')`这个判断条件，由此我们可以联想到系统控件是不需要加完整包名的，如`TextView`，而我们的自定义控件则必须使用完整包名，如`com.xxx.xxx.MyView`。这里没有`.`的就是系统控件，有`.`的就是自定义控件。对于系统控件，调用`onCreateView()`来创建`View`，对于自定义控件，则调用`createView()`方法来创建`View`。
+
+我们先看一下`tryCreateView()`方法做了什么：  
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/try_create_view8.png)    
+
+在`tryCreateView()`中用到了几个工厂`mFactory`、`mFactory2`和`mPrivateFactory`，我们来看一下这几个工厂：
+
+```java
+    @UnsupportedAppUsage
+    private Factory mFactory;
+    @UnsupportedAppUsage
+    private Factory2 mFactory2;
+    @UnsupportedAppUsage
+    private Factory2 mPrivateFactory;
+
+    public interface Factory {
+        /**
+         * Hook you can supply that is called when inflating from a LayoutInflater.
+         * You can use this to customize the tag names available in your XML
+         * layout files.
+         *
+         * <p>
+         * Note that it is good practice to prefix these custom names with your
+         * package (i.e., com.coolcompany.apps) to avoid conflicts with system
+         * names.
+         *
+         * @param name Tag name to be inflated.
+         * @param context The context the view is being created in.
+         * @param attrs Inflation attributes as specified in XML file.
+         *
+         * @return View Newly created view. Return null for the default
+         *         behavior.
+         */
+        @Nullable
+        View onCreateView(@NonNull String name, @NonNull Context context,
+                @NonNull AttributeSet attrs);
+    }
+
+    public interface Factory2 extends Factory {
+        /**
+         * Version of {@link #onCreateView(String, Context, AttributeSet)}
+         * that also supplies the parent that the view created view will be
+         * placed in.
+         *
+         * @param parent The parent that the created view will be placed
+         * in; <em>note that this may be null</em>.
+         * @param name Tag name to be inflated.
+         * @param context The context the view is being created in.
+         * @param attrs Inflation attributes as specified in XML file.
+         *
+         * @return View Newly created view. Return null for the default
+         *         behavior.
+         */
+        @Nullable
+        View onCreateView(@Nullable View parent, @NonNull String name,
+                @NonNull Context context, @NonNull AttributeSet attrs);
+    }
+```
+
+这两个工厂其实就是接口，而且`Factory2`是继承自`Factory`的，里面都有一个`onCreateView()`方法。
+
+回过头来继续看`tryCreateView()`，我们发现如果这几个工厂有不为空的话，就调用它的`onCreateView()`方法来创建`View`，否则的话就返回空的`View`。即`tryCreateView()`方法尝试用工厂接口来创建`View`，如果创建的`View`不为空的话，就不会走系统的创建`View`的过程了，否则走系统的创建`View`的过程。
+
+假如我们没有设置工厂的话，继续分析系统创建`View`的流程，先看创建系统控件`View`的`onCreateView()`方法：
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/on_create_view9.png)
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/on_create_view10.png) 
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/on_create_view11.png)   
+
+这里我们可以看到在`createView()`方法中传入了`android.view.`字符串参数，然后看一下在这个方法里面做了什么：
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/create_view12.png)   
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/create_view13.png)   
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/create_view14.png)   
+
+我们可以看到在最终的`createView()`方法中传进来的`prefix`参数`android.view.`和`name`参数拼接成系统`View`的完整路径名，如`android.view.TextView`，并通过反射拿到实例对象，并在854行将通过反射创建出来的`View`返回出去，这样就完成了系统自定义控件从`XML`到`View`的创建流程。
+
+再看看自定义`View`和系统控件`View`的区别：
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/create_view_from_tag15.png)    
+
+可以看到自定义`View`和系统`View`的创建流程其实是一样的，不过这里没有传前缀`prefix`参数，这样通过反射创建`View`的时候就不用拼接前缀了，直接用完整路径就可以拿到对象实例，直接创建`View`了。
+
+**总结：**
+
 resID  --> XmlResourceParser ---> while遍历当前布局里面所有的控件
 {
     要添加进去的View View view = createViewFromTag() {
@@ -151,13 +271,48 @@ resID  --> XmlResourceParser ---> while遍历当前布局里面所有的控件
 
 ### 3.2 `Factory2`的分析  
 
-系统的原始，我们什么都没有设置： setContentView
-一定会调用 系统的onCreateView函数(全部都让系统来控制来) 如果让系统控制来，我们就没法采集所有的控件了
+从3.1的分析中有这样一个疑问：为什么会有`tryCreateView()`这个方法呢，直接走`onCreateView()`创建`View`不就行了吗？
 
-工厂分析的时候  结论 先记住：mFactory2 = factory 就结束了，那么 factory到底是什么=onCreateView函数
-又一次分析setContentView  mFactory2.onCreateView()
+因为`android`为开发者提供了一个可以自行决定如何创建`View`的接口，即`LayoutInflater.Factory2`，在`tryCreateView()`中当`mFactory`不为空的时候就会走`Factory`中的`onCreateView()`方法，开发者重写`onCreateView()`方法就可以决定`View`的创建方式，以及创建什么样的`View`。
 
-if (mFactory2 != null) mFactory2  mFactory  都是接口   mFactory2 extends mFactory
+通过查看`Activity`源码我们可以发现`Activity`是实现了`LayoutInflater.Factory2`接口的，所以在`SkinActivity`中可以直接重写`onCreateView()`方法。
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/activity_factory2_16.png)  
+
+不过重写`onCreateView()`还不够，还需要通过：  
+
+```java
+LayoutInflater.from(this).setFactory2(this);
+```
+
+将自己实现的`LayoutInflater.Factory2`接口设置给`LayoutInflater`才能让自己的`onCreateView()`方法代替系统的`onCreateView()`方法。
+
+需要注意的是`setFactory2()`方法需要写在`super.onCreate(saveInstanceState)`之前：
+
+```java
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        //我们要抢先一步，比系统还有早，拿到主动权
+        LayoutInflaterCompat.setFactory2(LayoutInflater.from(this), this);
+        super.onCreate(savedInstanceState);
+    }
+```
+
+因为`Activity`的`onCreate()`方法中会取设置一遍`factory`:  
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/install_factory17.png)  
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/install_factory18.png)  
+
+可见，如果我们提前设置了`factory`，系统就不会再设置了。
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/set_factory19.png)  
+
+![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/install_factory20.png)  
+
+可以看到368行有一个`mFactorySet`标记，这个标记的初始值为false，一旦设置过一次`factory`，这个标记会在374行设置为`true`，下次再设置时，会在369行抛出异常。所以要在`Activity`的`super.onCreate()`方法之前调用`setFactory()`方法。
+
+**这就解释了2.2.3中为什么要在`onCreate()`方法中提前设置工厂，并且为什么要复写`onCreateView()`方法，而且在该方法中可以替换原生控件为自定义控件了。 **
 
 本文参考：  
 [android暗黑模式学习记录](https://www.yuque.com/docs/share/a80426d9-7607-49c3-9c4d-47e86f972f7c?#)
