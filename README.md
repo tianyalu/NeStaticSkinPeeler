@@ -260,7 +260,7 @@
 ```java
 resID  --> XmlResourceParser ---> while遍历当前布局里面所有的控件  
 {  
-    要添加进去的View View view = createViewFromTag() {  
+    要添加进去的View view = createViewFromTag() {  
         1.区分是否是自定义控件  
         不是自定义控件： android.view.TextView  
         无论是系统控件还是自定义控件，最终通过反射实例化  
