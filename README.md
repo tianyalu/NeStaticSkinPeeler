@@ -257,7 +257,7 @@
 可以看到自定义`View`和系统`View`的创建流程其实是一样的，不过这里没有传前缀`prefix`参数，这样通过反射创建`View`的时候就不用拼接前缀了，直接用完整路径就可以拿到对象实例，直接创建`View`了。
 
 **总结：**
-
+```java
 resID  --> XmlResourceParser ---> while遍历当前布局里面所有的控件  
 {  
     要添加进去的View View view = createViewFromTag() {  
@@ -268,6 +268,7 @@ resID  --> XmlResourceParser ---> while遍历当前布局里面所有的控件
     }  
     根布局.addView(view);  
 }  
+```
 
 ### 3.2 `Factory2`的分析  
 
@@ -310,7 +311,7 @@ LayoutInflater.from(this).setFactory2(this);
 
 ![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/set_factory20.png)  
 
-可以看到368行有一个`mFactorySet`标记，这个标记的初始值为false，一旦设置过一次`factory`，这个标记会在374行设置为`true`，下次再设置时，会在369行抛出异常。所以要在`Activity`的`super.onCreate()`方法之前调用`setFactory()`方法。
+可以看到368行有一个`mFactorySet`标记，这个标记的初始值为`false`，一旦设置过一次`factory`，这个标记会在374行设置为`true`，下次再设置时，会在369行抛出异常。所以要在`Activity`的`super.onCreate()`方法之前调用`setFactory()`方法。
 
 
 **这就解释了2.2.3中为什么要在`onCreate()`方法中提前设置工厂，并且为什么要复写`onCreateView()`方法，而且在该方法中可以替换原生控件为自定义控件了。**
