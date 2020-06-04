@@ -4,15 +4,15 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.widget.RelativeLayout;
 
 import com.sty.ne.libskin.R;
 import com.sty.ne.libskin.ViewsChange;
 import com.sty.ne.libskin.bean.AttrsBean;
 
-import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.content.ContextCompat;
 
-public class NeRelativeLayout extends LinearLayoutCompat implements ViewsChange {
+public class NeRelativeLayout extends RelativeLayout implements ViewsChange {
     private AttrsBean attrsBean;
     public NeRelativeLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
