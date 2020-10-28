@@ -12,7 +12,7 @@
 
 ### 2.1  总体思路 
 
-实现一键全局换肤的整体思路是重写`onCreateView()`方法，在此方法中将布局文件中的系统控件替换为自定义控件，在自定义控件中实现换肤接口，在需要换肤的时候递归遍历`decorView`中实现了换肤接口的控件，调用其换肤方法实现换肤。
+实现一键全局换肤的整体思路是重写在`Activity`的`onCreate()`方法中`setContentView(...)`之前设置工厂`Factory2`，然后重写`onCreateView()`方法（布局文件从`xml`渲染到屏幕的过程中会先调用`tryCreateView()`方法，该方法中调用`Factory2`的`onCreateView()`方法），在此方法中将布局文件中的系统控件替换为自定义控件，在自定义控件中实现换肤接口，在需要换肤的时候递归遍历`decorView`中实现了换肤接口的控件，调用其换肤方法实现换肤。
 
 ### 2.2 详细步骤
 
@@ -140,7 +140,7 @@
 
 为什么通过这句代码把布局ID丢进去之后就能把`xml`中的布局加载到`Activity`上呢？
 
-点击`setContentView()`跟进源码，一路追踪`AppcompatActivity`-->`AppCompatDelegate`-->`AppCompatDelegateImpl`，在`AppCompatDelegateImple`中，我们发现`resId`传给了`LayoutInflater`中的`inflate()`方法。  
+点击`setContentView()`跟进源码，一路追踪`AppcompatActivity`-->`AppCompatDelegate`-->`AppCompatDelegateImpl`，在`AppCompatDelegateImpl`中，我们发现`resId`传给了`LayoutInflater`中的`inflate()`方法。  
 
 ![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/set_content_view1.png)  
 
