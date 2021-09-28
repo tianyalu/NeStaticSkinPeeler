@@ -6,7 +6,7 @@
 
 ## 一、实现效果图
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/show.gif)  
+![image](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282014367.gif)  
 
 ## 二、实现过程浅析
 
@@ -142,29 +142,29 @@
 
 点击`setContentView()`跟进源码，一路追踪`AppcompatActivity`-->`AppCompatDelegate`-->`AppCompatDelegateImpl`，在`AppCompatDelegateImpl`中，我们发现`resId`传给了`LayoutInflater`中的`inflate()`方法。  
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/set_content_view1.png)  
+![set_content_view1](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282015692.png)
 
 继续查看`inflate()`方法  
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/inflate2.png)  
+![inflate2](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282017124.png)
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/inflate3.png)  
+![inflate3](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282017110.png)
 
 我们发现`resId`最终通过`Resources`的`getLayout()`方法将`int`型的资源`id`转换成了一个`XmlResourceParser`对象，该对象是一个xml的解析工具，具体用法可参考这里：[使用XmlResourceParser动态解析XML](https://www.jianshu.com/p/36b04fcf3d38)。
 
 然后再一次调用`inflate()`方法，并将转换后的`XmlResourceParser`对象传入。我们继续查看inflate()方法：
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/inflate4.png)
+![inflate4](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282017989.png)
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/inflate5.png)    
+![inflate5](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282017716.png)    
 
 在该方法中，如果`xml`的根布局为`<merge/>`标签的话，调用`rInflate()`方法递归创建`View`，否则的话就调用`createViewFromTag()`方法和`rInflateChildren()`方法，该方法又会调用`rInflate()`方法。我们先看一下`rInflate()`方法做了什么：
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/rinflate6.png)    
+![rinflate6](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282018393.png)  
 
 可以看到该方法先是做了一些检查，然后同样调用了`createViewFromTag()`方法和`rInflateChildren()`方法，我们先进入`createViewFromTag()`方法：
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/create_view_from_tag7.png)    
+![create_view_from_tag7](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282019342.png)
 
 这里我们关注两点，首先是调用`tryCreateView()`方法创建`View`；其次如果为空的话，会调用`onCreateView()`或`createView()`方法来创建`View`。
 
@@ -172,7 +172,7 @@
 
 我们先看一下`tryCreateView()`方法做了什么：  
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/try_create_view8.png)    
+![try_create_view8](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282019912.png)
 
 在`tryCreateView()`中用到了几个工厂`mFactory`、`mFactory2`和`mPrivateFactory`，我们来看一下这几个工厂：
 
@@ -234,25 +234,25 @@
 
 假如我们没有设置工厂的话，继续分析系统创建`View`的流程，先看创建系统控件`View`的`onCreateView()`方法：
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/on_create_view9.png)
+![on_create_view9](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282020314.png)
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/on_create_view10.png) 
+![on_create_view10](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282020857.png)
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/on_create_view11.png)   
+![on_create_view11](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282020721.png)
 
 这里我们可以看到在`createView()`方法中传入了`android.view.`字符串参数，然后看一下在这个方法里面做了什么：
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/create_view12.png)   
+![create_view12](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282021559.png)
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/create_view13.png)   
+![create_view13](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282021548.png)
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/create_view14.png)   
+![create_view14](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282021807.png)
 
 我们可以看到在最终的`createView()`方法中传进来的`prefix`参数`android.view.`和`name`参数拼接成系统`View`的完整路径名，如`android.view.TextView`，并通过反射拿到实例对象，并在854行将通过反射创建出来的`View`返回出去，这样就完成了系统自定义控件从`XML`到`View`的创建流程。
 
 再看看自定义`View`和系统控件`View`的区别：
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/create_view_from_tag15.png)    
+![create_view_from_tag15](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282022729.png)
 
 可以看到自定义`View`和系统`View`的创建流程其实是一样的，不过这里没有传前缀`prefix`参数，这样通过反射创建`View`的时候就不用拼接前缀了，直接用完整路径就可以拿到对象实例，直接创建`View`了。
 
@@ -278,7 +278,7 @@ resID  --> XmlResourceParser ---> while遍历当前布局里面所有的控件
 
 通过查看`Activity`源码我们可以发现`Activity`是实现了`LayoutInflater.Factory2`接口的，所以在`SkinActivity`中可以直接重写`onCreateView()`方法。
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/activity_factory2_16.png)  
+![activity_factory2_16](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282022100.png)
 
 不过重写`onCreateView()`还不够，还需要通过：  
 
@@ -301,15 +301,15 @@ LayoutInflater.from(this).setFactory2(this);
 
 因为`Activity`的`onCreate()`方法中会取设置一遍`factory`:  
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/install_factory17.png)  
+![install_factory17](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282022425.png)
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/install_factory18.png)  
+![install_factory18](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282023111.png)
 
 可见，如果我们提前设置了`factory`，系统就不会再设置了。
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/set_factory19.png)  
+![set_factory19](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282023743.png)
 
-![image](https://github.com/tianyalu/NeStaticSkinPeeler/raw/master/show/set_factory20.png)  
+![set_factory20](https://gitee.com/tianyalusty/pic-go-repository/raw/master/img/202109282023002.png)
 
 可以看到368行有一个`mFactorySet`标记，这个标记的初始值为`false`，一旦设置过一次`factory`，这个标记会在374行设置为`true`，下次再设置时，会在369行抛出异常。所以要在`Activity`的`super.onCreate()`方法之前调用`setFactory()`方法。
 
